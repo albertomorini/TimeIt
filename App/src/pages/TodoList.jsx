@@ -17,12 +17,10 @@ const TodoList = () => {
 
             <IonContent className="ion-padding">
 
-
-
                 <IonItemSliding>
                     <IonItem>
                         <IonCheckbox></IonCheckbox>
-                        <IonText>Lavare il gatto</IonText>
+                        <IonText className="ion-text-start">Lavare il gatto</IonText>
                     </IonItem>
                     <IonItemOptions>
                         <IonItemOption >
