@@ -66,6 +66,7 @@ const ModalActivity = (props) => {
                     <IonToolbar>
                         <IonTitle>New activity</IonTitle>
                         <IonButton color="danger" slot="end"
+                        size="small"
                             onClick={() => {
                                 refModal?.current?.dismiss()
                                 cleanInputs()
