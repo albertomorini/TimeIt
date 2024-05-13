@@ -1,17 +1,19 @@
 import { IonButton, IonCol, IonContent, IonHeader, IonIcon, IonModal, IonProgressBar, IonRow, IonToolbar } from "@ionic/react";
-import { closeOutline, playOutline, stopOutline, time } from "ionicons/icons";
+import { closeOutline, playOutline, stopOutline } from "ionicons/icons";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import "../theme/timer.css";
+import moment from "moment";
 
 const Timer = forwardRef((props, ref) => {
 
     const refModalTimer = useRef()
-    let dummyDate = new Date();
-    const [DummyDate, setDummyDate] = useState(new Date())
-    let timer = null;
-    const [TimeLeft, setTimeLeft] = useState(null); //difference time
-    const [SliderValue, setSliderValue] = useState(1);
-    const [InitialTimer, setInitialTimer] = useState(null);
+
+    let [AbsDifference, setAbsDifference] = useState(null);
+    let [IsPause, setIsPause] = useState(false);
+    var timer = null;
+
+    let [InitialDifference, setInitialDifference] = useState(null);
+
 
     /**
      * 
@@ -20,74 +22,74 @@ const Timer = forwardRef((props, ref) => {
      * @param {int} p_seconds seconds desired
      */
     function initializeTimer(p_hours = 0, p_minutes = 0, p_seconds = 0) {
-        //TODO: manage the offset for the otherside of the world
 
-        DummyDate.setHours(
-            (dummyDate.getUTCHours() - (DummyDate.getTimezoneOffset() / 60) + p_hours)//remove the offset
-        ) // set parametric hours
-        DummyDate.setUTCMinutes(DummyDate.getMinutes() + p_minutes) // set parametric minutes
-        DummyDate.setUTCSeconds(DummyDate.getSeconds() + p_seconds) // set parametric seconds
+        let tmp = moment()
+        tmp.add(p_hours, "hours")
+        tmp.add(p_minutes, "minutes")
+        tmp.add(p_seconds + 1, "seconds")//manual fix
 
-        let difference = DummyDate - +new Date();
-        let tmp = 0;
-        if (difference > 0) {
-            tmp = {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
 
-        setInitialTimer(tmp);
-
+        setInitialDifference(moment.duration(tmp.diff(moment().utc())));
+        setAbsDifference(moment.duration(tmp.diff(moment().utc())));
+        tmp = moment.duration(tmp.diff(moment().utc()))
+        setTimeout(() => {
+            document.getElementById("PlaceholderTimer").innerText = (tmp.hours() < 10 ? "0" + tmp.hours() : tmp.hours()) + ":" +
+                (tmp.minutes() < 10 ? "0" + tmp.minutes() : tmp.minutes()) + ":" +
+                (tmp.seconds() < 10 ? "0" + tmp.seconds() : tmp.seconds())
+            document.getElementById("progressBar").value = 1
+        }, 1000) //just wait to load the dom
     }
 
-    let xtmp = 0;
-    const calculateTimeLeft = () => {
-
-        let difference = DummyDate - +new Date();
-        if (xtmp == 0) {
-            xtmp = difference
-        }
-        console.log(difference);
-        setSliderValue((difference / xtmp));
-        let tmp = 0;
-        if (difference > 0) {
-            tmp = {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
-        return tmp;
-    }
-
-
-    function startTimer() {
-
+    function startTimer(flgPause = false) {
+        //NB: in interval we can't relay to the react state --> interval already loads the "state" so change it doesn't works
         timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000); //every second
+            if (!flgPause) {
+                setAbsDifference(
+                    AbsDifference.subtract(1, "seconds") //remove 1 sec
+                )
+                let text = "Time is up!"
+                if (AbsDifference > 0) {
+                    text = (AbsDifference.hours() < 10 ? "0" + AbsDifference.hours() : AbsDifference.hours()) + ":" +
+                        (AbsDifference.minutes() < 10 ? "0" + AbsDifference.minutes() : AbsDifference.minutes()) + ":" +
+                        (AbsDifference.seconds() < 10 ? "0" + AbsDifference.seconds() : AbsDifference.seconds())
+                } else {
+                    //STOP THE TIMER
+                    clearInterval(timer);
+                    timer = null;
+                }
+                document.getElementById("PlaceholderTimer").innerText = text
+                document.getElementById("progressBar").value = (AbsDifference / InitialDifference)
+                if (AbsDifference / InitialDifference < 0.4 && AbsDifference / InitialDifference > 0.2) {
+                    document.getElementById("progressBar").color = "warning"
+                } else if (AbsDifference / InitialDifference < 0.2) {
+                    document.getElementById("progressBar").color = "danger"
+                }
+            }
+        }, 1000); //every 1 second
     }
+
+    function pauseTimer() {
+        clearInterval(timer);
+        timer = null;
+    }
+
 
     function clearTimer() {
-        clearInterval(timer);
-        timer=null;
+        setAbsDifference(null)
+        setInitialDifference(null)
+        clearTimeout(timer);
+        timer = null;
+        setIsPause(false)
     }
-
-
-
 
     useImperativeHandle(ref, () => ({
         //salva l'intervento
         setTimer: async (hour, minutes, seconds) => {
-            console.log("TEST");
-            console.log(props);
+
             initializeTimer(hour, minutes, seconds); //initialize the timer by adding an offset {hour,minutes,seconds}
             //SHOW THE TIMER
-            refModalTimer?.current?.present()
+            refModalTimer?.current?.present();
+
         }
     }));
 
@@ -111,83 +113,53 @@ const Timer = forwardRef((props, ref) => {
                 </IonToolbar>
             </IonHeader>
 
+            <IonContent className="ion-padding">
 
-            <IonContent>
-                {
-                    (SliderValue > 0) ?
-                        <h2 className="centerNumbers">
-                            {
-                                (TimeLeft == null) ?
-                                    (InitialTimer?.hours < 10) ? "0" + InitialTimer?.hours : InitialTimer?.hours
-                                    :
-                                    (TimeLeft?.hours < 10) ?
-                                        "0" + TimeLeft?.hours
-                                        :
-                                        TimeLeft?.hours
-                            }
-                            :
-                            {
-                                (TimeLeft == null) ?
-                                    (InitialTimer?.minutes < 10) ? "0" + InitialTimer?.minutes : InitialTimer?.minutes
-                                    :
-                                    (TimeLeft?.minutes < 10) ?
-                                        "0" + TimeLeft?.minutes
-                                        :
-                                        TimeLeft?.minutes
-                            }
-                            :
-                            {
-                                (TimeLeft == null) ?
-                                    (InitialTimer?.seconds < 10) ? "0" + InitialTimer?.seconds : InitialTimer?.seconds
-                                    :
-                                    (TimeLeft?.seconds < 10) ?
-                                        "0" + TimeLeft?.seconds
-                                        :
-                                        TimeLeft?.seconds
-                            }
-                        </h2>
-                        :
-                        <h2 className="TimeUpMessage">Time is up!</h2>
-                }
+                <h2 className="centerNumbers">
+                    <p id="PlaceholderTimer"></p>
+                    <IonProgressBar id="progressBar" />
+                </h2>
+
 
                 <IonRow>
-                    <IonCol>
-                        <IonButton
-                            disabled={(SliderValue == 1) ? true : false}
-                            className="buttonsTimer"
-                            style={{ float: "left" }}
-                            onClick={() => {
-                                clearTimer()
-                            }}
-                            color="danger"
-                        > Stop
-                            <IonIcon icon={stopOutline} />
-                        </IonButton>
-                    </IonCol>
-                    <IonCol>
 
-                        <IonButton
-                            style={{ float: "right" }}
+                    {(IsPause) ?
+                        <IonCol>
+                            <IonButton
 
-                            onClick={() => {
-                                startTimer()
-                            }}
-                            className="buttonsTimer"
-                        > Start
-                            <IonIcon icon={playOutline} />
-                        </IonButton>
-                    </IonCol>
+                                className="buttonsTimer"
+                                style={{ float: "right" }}
+                                onClick={() => {
+                                    if (!IsPause) {
+                                        pauseTimer()
+                                        setIsPause(true)
+                                    } else {
+                                        startTimer(false)
+
+                                    }
+                                }}
+                                color="danger"
+                            > Pause
+                                <IonIcon icon={stopOutline} />
+                            </IonButton>
+                        </IonCol>
+                        :
+                        <IonCol>
+
+                            <IonButton
+                                style={{ float: "right" }}
+
+                                onClick={() => {
+                                    startTimer()
+                                }}
+                                className="buttonsTimer"
+                            > Start
+                                <IonIcon icon={playOutline} />
+                            </IonButton>
+                        </IonCol>}
 
                 </IonRow>
 
-
-                <IonProgressBar
-                    value={SliderValue}
-                    color={
-                        (SliderValue > 0.4) ? "primary" :
-                            (SliderValue > 0.2) ? "warning" : "danger"
-                    }
-                ></IonProgressBar>
 
             </IonContent>
         </IonModal>

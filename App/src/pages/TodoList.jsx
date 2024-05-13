@@ -4,7 +4,7 @@ import ModalActivity from "../components/ModalActivity";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
 import { Storage } from '@ionic/storage';
-
+import moment from "moment";
 
 const TodoList = () => {
     const store = new Storage();
@@ -19,18 +19,32 @@ const TodoList = () => {
     }
 
     function showTimer(data){
-        refModalTimer?.current?.setTimer(data.hour,data.minutes,data.seconds);
+        console.log(data);
+        
+        refModalTimer?.current?.setTimer(
+            (data.hour=="00")?0:data.hour,
+            (data.minutes == "00") ? 0 : data.minutes,
+            (data.seconds == "00")?0: data.seconds,
+        )
     }
 
     function marksActivity(activityTitle){
         console.log(activityTitle);
         let d = new Date();
-        //TODO: use moment pls
+
+        //TODO: when timer ends marks the activity as completed
         console.log(d.getUTCDay()+"/"+(d.getUTCMonth()+1)+"/"+d.getUTCFullYear());
+        console.log(moment().format("DD/MM/YYYY"));
+        
     }
 
     useEffect(() => {
         loadActivities()
+        // showTimer({
+        //     hour:0,
+        //     minutes: 1,
+        //     seconds: 3
+        // })
     }, [])
     return (
         <>
@@ -109,6 +123,7 @@ const TodoList = () => {
             </IonContent>
             <Timer ref={refModalTimer}/>
         </>
+
 
     )
 };

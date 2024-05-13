@@ -1,13 +1,9 @@
 .centerNumbers {
     margin: 0 auto;
     text-align: center;
-    font-size: 7em;
+    font-size: 4em;
 }
-.TimeUpMessage {
-    margin: 0 auto;
-    text-align: center;
-    font-size: 5em;
-}
+
 
 .buttonsTimer {
     --border-radius: 12px !important;
