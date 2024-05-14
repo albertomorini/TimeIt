@@ -89,7 +89,6 @@ const Timer = forwardRef((props, ref) => {
             initializeTimer(hour, minutes, seconds); //initialize the timer by adding an offset {hour,minutes,seconds}
             //SHOW THE TIMER
             refModalTimer?.current?.present();
-
         }
     }));
 

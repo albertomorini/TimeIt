@@ -1,5 +1,5 @@
-import { IonCardSubtitle, IonCheckbox, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonTitle, IonToolbar } from "@ionic/react";
-import { checkmarkOutline, createOutline, timerOutline } from "ionicons/icons";
+import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonHeader, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonRow, IonSearchbar, IonTitle, IonToolbar } from "@ionic/react";
+import { checkmarkOutline, createOutline, filterOutline, timerOutline } from "ionicons/icons";
 import ModalActivity from "../components/ModalActivity";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
@@ -11,40 +11,61 @@ const TodoList = () => {
     const refModalTimer = useRef();
 
     const [ActivityList, setActivityList] = useState();
+    const [CompletedActivity, setCompletedActivity] = useState();
+
+    const [FilterCompleted, setFilterCompleted] = useState(false);
+
+    const [SearchValue, setSearchValue] = useState();
 
     async function loadActivities() {
         await store.create();
         let activities = await store.get('activities');
-        setActivityList(activities)
+        setActivityList(activities);
+
+        //Load completed
+        await store.create()
+        let dummy = await store.get("activities_completed");
+        setCompletedActivity(dummy)
     }
 
-    function showTimer(data){
+    function showTimer(data) {
         console.log(data);
-        
+
         refModalTimer?.current?.setTimer(
-            (data.hour=="00")?0:data.hour,
+            (data.hour == "00") ? 0 : data.hour,
             (data.minutes == "00") ? 0 : data.minutes,
-            (data.seconds == "00")?0: data.seconds,
+            (data.seconds == "00") ? 0 : data.seconds,
         )
     }
 
-    function marksActivity(activityTitle){
+    async function marksActivity(activityTitle) {
         console.log(activityTitle);
         let d = new Date();
 
         //TODO: when timer ends marks the activity as completed
-        console.log(d.getUTCDay()+"/"+(d.getUTCMonth()+1)+"/"+d.getUTCFullYear());
-        console.log(moment().format("DD/MM/YYYY"));
-        
+
+        //TODO: when it's done change the color just in the state ~~ on refresh will be removed and shown just on the history
+
+        //TODO: manage the undo
+
+        //TODO: senti marco per lo schedule
+
+
+        await store.create();
+        let activityDone = await store.get("activities_completed"); //ActivityDone -> { title:date}
+        if (activityDone == null) {
+            activityDone = []
+        };
+        activityDone.push({
+            "Title": activityTitle,
+            "Date": moment().format("DD/MM/YYYY HH:mm:ss")
+        })
+        store.set("activities_completed", activityDone);
+
     }
 
     useEffect(() => {
-        loadActivities()
-        // showTimer({
-        //     hour:0,
-        //     minutes: 1,
-        //     seconds: 3
-        // })
+        loadActivities();
     }, [])
     return (
         <>
@@ -57,18 +78,31 @@ const TodoList = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">
-
+                <IonRow>
+                    <IonCol>
+                        <IonSearchbar
+                            placeholder="Search activity"
+                            onIonInput={(ev) => { setSearchValue(ev?.target?.value) }}
+                        />
+                    </IonCol>
+                    <IonCol size="1">
+                        <IonButton
+                            onClick={() => { setFilterCompleted(!FilterCompleted); }}
+                            color={(FilterCompleted) ? "primary" : "dark"}
+                        >
+                            <IonIcon icon={filterOutline} />
+                        </IonButton>
+                    </IonCol>
+                </IonRow>
                 {
                     (ActivityList != null) ?
-                        Object.keys(ActivityList).map(s => {
+                        Object.keys(ActivityList).filter(s => (SearchValue != null) ? ActivityList[s].Title.startsWith(SearchValue) : s).map(s => {
                             return (
                                 <IonItemSliding>
 
-
                                     <IonItem>
-
                                         <IonCheckbox labelPlacement="end" justify="start"
-                                        onIonChange={()=>{marksActivity(ActivityList[s].Title)}}
+                                            onIonChange={() => { marksActivity(ActivityList[s].Title) }}
                                         >
                                             <IonLabel>{ActivityList[s].Title}</IonLabel>
                                         </IonCheckbox>
@@ -88,17 +122,33 @@ const TodoList = () => {
                                             null
                                         } */}
 
-                                    <IonItemOptions side="start">
-                                        <IonItemOption color="success" >
+                                    <IonItemOptions side="start" onIonSwipe={() => { marksActivity(ActivityList[s].Title) }}>
+                                        <IonItemOption color="success" expandable
+                                            onClick={() => { marksActivity(ActivityList[s].Title) }}
+                                        >
                                             <IonIcon slot="bottom" icon={checkmarkOutline}></IonIcon>
                                             Done
                                         </IonItemOption>
                                     </IonItemOptions>
-                                    <IonItemOptions side="end">
+                                    <IonItemOptions side="end" onIonSwipe={() => {
+                                        if (ActivityList[s].Mode == 'timer') {
+                                            showTimer(ActivityList[s].Timer)
+                                        } else {
+                                            //TODO: edit
+
+                                        }
+                                    }}>
+
+                                        <IonItemOption expandable
+                                            onClick={() => { console.log("OKOK") }}>
+                                            <IonIcon slot="bottom" icon={createOutline}></IonIcon>
+                                            Edit
+                                        </IonItemOption>
                                         {
                                             (ActivityList[s].Mode == 'timer') ?
                                                 <IonItemOption color={"warning"}
-                                                onClick={()=>{showTimer(ActivityList[s].Timer)}}
+                                                    onClick={() => { showTimer(ActivityList[s].Timer) }}
+                                                    expandable
                                                 >
                                                     <IonIcon slot="bottom" icon={timerOutline} />
                                                     Timer
@@ -106,12 +156,6 @@ const TodoList = () => {
                                                 :
                                                 null
                                         }
-                                        <IonItemOption expandable
-                                            onClick={() => { console.log("OKOK") }}>
-                                            <IonIcon slot="bottom" icon={createOutline}></IonIcon>
-                                            Edit
-                                        </IonItemOption>
-
                                     </IonItemOptions>
                                 </IonItemSliding>
                             )
@@ -120,8 +164,31 @@ const TodoList = () => {
                         null
                 }
 
+                {//TODO: show completed
+                    (FilterCompleted) ?
+                        <>
+                            <IonItemDivider />
+                            {CompletedActivity?.map(s => (
+                                <IonItem>
+                                    <IonCol>
+
+                                        {s.Title}
+                                    </IonCol>
+                                    <IonCol
+                                        style={{ textAlign: "right" }}
+                                    >
+                                        {s.Date}
+                                    </IonCol>
+                                </IonItem>
+                            ))}
+                        </>
+
+                        :
+                        null
+                }
+
             </IonContent>
-            <Timer ref={refModalTimer}/>
+            <Timer ref={refModalTimer} />
         </>
 
 

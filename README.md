@@ -7,6 +7,13 @@
 - Marco Bellò
 
 
+------------------------------
+
+Open stuff:
+- grafica/comfort zone
+- schedule is kinda hard, do it or nah pace?
+
+------------------------------
 ## Idea
 
 ## Technology 
