@@ -100,20 +100,15 @@ const Timer = forwardRef((props, ref) => {
                 console.log(props)
             }}
         >
-            <IonHeader>
-                <IonToolbar>
-                    <IonButton color="danger" slot="end"
+
+            <IonContent className="ion-padding">
+                    <IonButton color="danger" 
                         onClick={() => {
                             refModalTimer?.current?.dismiss()
-                            //TODO: rivedere --> toglierei la possibilità di minimizzare e lascerei lo stop
                         }}
                     >
                         <IonIcon icon={closeOutline} />
                     </IonButton>
-                </IonToolbar>
-            </IonHeader>
-
-            <IonContent className="ion-padding">
 
                 <h2 className="centerNumbers">
                     <p id="PlaceholderTimer"></p>

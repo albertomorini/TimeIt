@@ -1,5 +1,5 @@
 import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonHeader, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonRow, IonSearchbar, IonTitle, IonToolbar } from "@ionic/react";
-import { checkmarkOutline, createOutline, filterOutline, timerOutline } from "ionicons/icons";
+import { checkmarkOutline, createOutline, filterOutline, timeOutline, timerOutline } from "ionicons/icons";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
 import { Storage } from '@ionic/storage';
@@ -75,14 +75,19 @@ const TodoList = () => {
                         <IonSearchbar
                             placeholder="Search activity"
                             onIonInput={(ev) => { setSearchValue(ev?.target?.value) }}
+                            // mode="ios"
                         />
                     </IonCol>
                     <IonCol size="1">
                         <IonButton
                             onClick={() => { setFilterCompleted(!FilterCompleted); }}
                             color={(FilterCompleted) ? "primary" : "dark"}
+                            size="small"
+                            style={{
+                                marginTop:"14px"
+                            }}
                         >
-                            <IonIcon icon={filterOutline} />
+                            <IonIcon icon={timeOutline} />
                         </IonButton>
                     </IonCol>
                 </IonRow>

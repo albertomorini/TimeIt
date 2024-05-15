@@ -63,6 +63,7 @@ const ContentActivity = (props) => {
                     onIonInput={(ev) => setActivityTitle(ev.target.value)}
                 />
             </IonRow>
+            <br/>
             <IonRow>
                 <IonLabel><b>Mode</b>: </IonLabel>
                 <IonSegment onIonChange={(ev) => { setActivityMode(ev.target.value) }}
@@ -75,8 +76,8 @@ const ContentActivity = (props) => {
             {
                 (ActivityMode == 'timer') ?
                     <IonDatetime presentation="time"
-                    value={moment().set({hours:ActivityTimer.hour, minutes:ActivityTimer.minutes}).format()}
-                    hourCycle="h23"
+                        value={moment().set({ hours: ActivityTimer.hour, minutes: ActivityTimer.minutes }).format()}
+                        hourCycle="h23"
                         onIonChange={(ev) => {
                             setActivityTimer({
                                 hour: parseInt(moment(ev.target.value).format("HH")),
@@ -88,6 +89,8 @@ const ContentActivity = (props) => {
                     :
                     null
             }
+            <br />
+
             <IonRow>
                 <IonLabel><b>Schedule</b>: </IonLabel>
                 <IonInput
@@ -96,10 +99,13 @@ const ContentActivity = (props) => {
                     placeholder="Repeat every # day"
                 />
             </IonRow>
+            <br />
+
             <IonButton expand="block"
                 onClick={() => {
                     saveActivity()
                 }}
+                size="small"
             >
                 Save new activity
                 <IonIcon icon={checkmarkCircle} />
