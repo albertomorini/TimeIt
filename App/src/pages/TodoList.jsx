@@ -1,14 +1,15 @@
 import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonHeader, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonRow, IonSearchbar, IonTitle, IonToolbar } from "@ionic/react";
 import { checkmarkOutline, createOutline, filterOutline, timerOutline } from "ionicons/icons";
-import ModalActivity from "../components/ModalActivity";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
 import { Storage } from '@ionic/storage';
 import moment from "moment";
+import ModalActivity from "../components/ModalActivity";
 
 const TodoList = () => {
     const store = new Storage();
     const refModalTimer = useRef();
+    const refModalActivity= useRef(); //for the edit modal
 
     const [ActivityList, setActivityList] = useState();
     const [CompletedActivity, setCompletedActivity] = useState();
@@ -48,9 +49,6 @@ const TodoList = () => {
 
         //TODO: manage the undo
 
-        //TODO: senti marco per lo schedule
-
-
         await store.create();
         let activityDone = await store.get("activities_completed"); //ActivityDone -> { title:date}
         if (activityDone == null) {
@@ -69,14 +67,8 @@ const TodoList = () => {
     }, [])
     return (
         <>
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Time It</IonTitle>
-                    <ModalActivity
-                        savedActivity={() => loadActivities()}
-                    />
-                </IonToolbar>
-            </IonHeader>
+            <br></br>
+            <br></br>
             <IonContent className="ion-padding">
                 <IonRow>
                     <IonCol>
@@ -134,13 +126,12 @@ const TodoList = () => {
                                         if (ActivityList[s].Mode == 'timer') {
                                             showTimer(ActivityList[s].Timer)
                                         } else {
-                                            //TODO: edit
-
+                                            refModalActivity?.current?.editActivity()
                                         }
                                     }}>
 
                                         <IonItemOption expandable
-                                            onClick={() => { console.log("OKOK") }}>
+                                            onClick={() => { refModalActivity?.current?.editActivity() }}>
                                             <IonIcon slot="bottom" icon={createOutline}></IonIcon>
                                             Edit
                                         </IonItemOption>
@@ -189,6 +180,7 @@ const TodoList = () => {
 
             </IonContent>
             <Timer ref={refModalTimer} />
+            <ModalActivity ref={refModalActivity} />
         </>
 
 

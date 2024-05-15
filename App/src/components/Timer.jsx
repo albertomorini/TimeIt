@@ -105,6 +105,7 @@ const Timer = forwardRef((props, ref) => {
                     <IonButton color="danger" slot="end"
                         onClick={() => {
                             refModalTimer?.current?.dismiss()
+                            //TODO: rivedere --> toglierei la possibilità di minimizzare e lascerei lo stop
                         }}
                     >
                         <IonIcon icon={closeOutline} />
