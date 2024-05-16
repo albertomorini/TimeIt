@@ -13,6 +13,7 @@ const Timer = forwardRef((props, ref) => {
     var timer = null;
 
     let [InitialDifference, setInitialDifference] = useState(null);
+    let [ActivityTitle,setActivityTitle] = useState();
 
 
     /**
@@ -64,6 +65,10 @@ const Timer = forwardRef((props, ref) => {
                 } else if (AbsDifference / InitialDifference < 0.2) {
                     document.getElementById("progressBar").color = "danger"
                 }
+                //MARKS ACTIVITY AS DONE IF TIMER ENDED
+                if(AbsDifference==0){
+                    props?.marksActivity(ActivityTitle)
+                }
             }
         }, 1000); //every 1 second
     }
@@ -84,22 +89,19 @@ const Timer = forwardRef((props, ref) => {
 
     useImperativeHandle(ref, () => ({
         //salva l'intervento
-        setTimer: async (hour, minutes, seconds) => {
+        setTimer: async (hour, minutes, seconds,activityTitle) => {
 
             initializeTimer(hour, minutes, seconds); //initialize the timer by adding an offset {hour,minutes,seconds}
             //SHOW THE TIMER
             refModalTimer?.current?.present();
+            setActivityTitle(activityTitle)
         }
     }));
 
 
 
     return (
-        <IonModal ref={refModalTimer}
-            onIonModalDidDismiss={() => {
-                console.log(props)
-            }}
-        >
+        <IonModal ref={refModalTimer}>
 
             <IonContent className="ion-padding">
                     <IonButton color="danger" 

@@ -1,0 +1,5 @@
+.ActivityDone{
+    --text-decoration: line-through;
+    --color: red;
+    --background-color: red;
+}

@@ -35,7 +35,6 @@ const NewActivity = (props) => {
         if (ActivityTimer != null && ActivityTimer != null && ActivityDaySchedule != null && ActivityMode != null) {
             await store.create();
             let activities = await store.get('activities');
-            //TODO: check if already exists
             if (activities == null) {
                 activities = {}
             }
