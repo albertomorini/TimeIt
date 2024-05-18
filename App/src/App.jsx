@@ -52,10 +52,10 @@ import NewActivity from './pages/NewActivity.jsx';
 setupIonicReact();
 
 
-const App: React.FC = () => {
+const App = () => {
   
   function returnToList() {
-    window.location="/todoList"
+    window.location= '/todoList'
   }
   
   return (

@@ -1,7 +1,7 @@
-import { IonButton, IonCol, IonContent, IonDatetime, IonIcon, IonInput, IonLabel, IonRow, IonSegment, IonSegmentButton } from "@ionic/react";
+import { IonButton, IonContent, IonDatetime, IonIcon, IonInput, IonLabel, IonRow, IonSegment, IonSegmentButton } from "@ionic/react";
 import { checkmarkCircle } from "ionicons/icons";
-import { useRef, useState } from "react";
-import moment from "moment"
+import { useEffect, useRef, useState } from "react";
+import moment from "moment";
 
 import { Storage } from '@ionic/storage';
 
@@ -11,13 +11,13 @@ const ContentActivity = (props) => {
     const store = new Storage();
 
 
-    const [ActivityTitle, setActivityTitle] = useState(null);
-    const [ActivityMode, setActivityMode] = useState("classic"); //default value for mode
+    const [ActivityTitle, setActivityTitle] = useState(props?.defaultValues?.title);
+    const [ActivityMode, setActivityMode] = useState((props?.defaultValues?.mode != undefined) ? props?.defaultValues?.mode : "classic"); //default value for mode
     const [ActivityDaySchedule, setActivityDaySchedule] = useState(null);
     const [ActivityTimer, setActivityTimer] = useState({
-        hour: 0,
-        minutes: 0,
-        seconds: 0
+        hour: props?.defaultValues?.timer?.hour,
+        minutes: props?.defaultValues?.timer?.minutes,
+        seconds: props?.defaultValues?.timer?.seconds
     });
 
     function cleanInputs() {
@@ -32,7 +32,8 @@ const ContentActivity = (props) => {
     }
 
     async function saveActivity() {
-        if (ActivityTimer != null && ActivityTimer != null && ActivityDaySchedule != null && ActivityMode != null) {
+        if (ActivityTimer != null && ActivityTimer != null// && ActivityDaySchedule != null 
+            && ActivityMode != null) {
             await store.create();
             let activities = await store.get('activities');
 
@@ -51,7 +52,6 @@ const ContentActivity = (props) => {
             props?.savedActivity()
         }
     }
-
     return (
         <IonContent className="ion-padding">
             <br></br>
@@ -59,11 +59,12 @@ const ContentActivity = (props) => {
             <IonRow>
                 <IonLabel><b>Name:</b></IonLabel>
                 <IonInput fill="outline"
+                    value={ActivityTitle}
                     placeholder="What's the name of new activity?"
                     onIonInput={(ev) => setActivityTitle(ev.target.value)}
                 />
             </IonRow>
-            <br/>
+            <br />
             <IonRow>
                 <IonLabel><b>Mode</b>: </IonLabel>
                 <IonSegment onIonChange={(ev) => { setActivityMode(ev.target.value) }}
@@ -91,14 +92,14 @@ const ContentActivity = (props) => {
             }
             <br />
 
-            <IonRow>
+            {/* <IonRow>
                 <IonLabel><b>Schedule</b>: </IonLabel>
                 <IonInput
                     onIonInput={(ev) => setActivityDaySchedule(ev.target.value)}
                     type="number"
                     placeholder="Repeat every # day"
                 />
-            </IonRow>
+            </IonRow> */}
             <br />
 
             <IonButton expand="block"

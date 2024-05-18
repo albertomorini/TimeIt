@@ -1,4 +1,4 @@
-import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonRow, IonSearchbar } from "@ionic/react";
+import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonList, IonRow, IonSearchbar } from "@ionic/react";
 import { checkmarkOutline, createOutline, timeOutline, timerOutline } from "ionicons/icons";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
@@ -23,7 +23,8 @@ const TodoList = () => {
     async function loadActivities() {
         await store.create();
         let activities = await store.get('activities');
-        setActivityList(activities);
+        let tmp = Object.keys(activities).map(s=> activities[s])
+        setActivityList(tmp);
 
         //Load completed
         await store.create()
@@ -32,7 +33,6 @@ const TodoList = () => {
     }
 
     function showTimer(data, title) {
-
         refModalTimer?.current?.setTimer(
             (data.hour == "00") ? 0 : data.hour,
             (data.minutes == "00") ? 0 : data.minutes,
@@ -42,21 +42,26 @@ const TodoList = () => {
     }
 
     async function marksActivity(activityTitle) {
-
+        
         let d = new Date();
-
+        
         let tmpList = ActivityList;
-        setActivityList(null)
-        tmpList[activityTitle].Done = true
-        let dummyActivity = tmpList[activityTitle]
-        delete tmpList[activityTitle]
+        let activity = tmpList.find(s=> s.Title==activityTitle)
+        setActivityList(null);
+        
+        tmpList.splice(tmpList.indexOf(activity),1); //remove it 
+        
+        //TODO: for manage the undone -->        //activity.Done=!activity.Done; //if done marks as undone - viceversa
+        activity.Done=true; //set as done
+        
+        
+        tmpList.push(activity) //push it at the end
+        setActivityList(tmpList) 
 
 
         await store.create();
         await store.set('activities', tmpList); //remove from the storage 
 
-        tmpList[activityTitle] = dummyActivity
-        setActivityList(tmpList) //TODO: why don't refresh?
 
 
         await store.create();
@@ -70,6 +75,7 @@ const TodoList = () => {
         })
         store.set("activities_completed", activityDone);
 
+        loadActivities()
     }
 
     useEffect(() => {
@@ -79,7 +85,7 @@ const TodoList = () => {
         <>
             <br></br>
             <br></br>
-            <IonContent className="ion-padding">
+            <IonContent className="ion-padding" fullscreen="true">
                 <IonRow>
                     <IonCol>
                         <IonSearchbar
@@ -103,57 +109,56 @@ const TodoList = () => {
                 </IonRow>
                 {
                     (ActivityList != null) ?
-                        Object.keys(ActivityList).filter(s => (SearchValue != null) ? ActivityList[s].Title.startsWith(SearchValue) : s)
-                            // .sort((a, b) => a.Done - b.Done)
+                        ActivityList?.filter(s => (SearchValue != null) ? s.Title.startsWith(SearchValue) : s)
+                            // .sort((a, b) => a?.Done - b?.Done)
                             .map(s => {
                                 return (
                                     <IonItemSliding>
-
-                                        <IonItem key={ActivityList[s].Title}>
+                                        <IonItem key={s?.Title}>
                                             <IonCheckbox labelPlacement="end" justify="start"
-                                                checked={ActivityList[s].Done ? true : null}
-                                                disabled={ActivityList[s].Done ? true : null}
-                                                onIonChange={() => { marksActivity(ActivityList[s].Title) }}
+                                                checked={s?.Done ? true : null}
+                                                disabled={s?.Done ? true : null}
+                                                onIonChange={() => { marksActivity(s.Title) }}
                                             >
                                                 {
-                                                    (ActivityList[s].Done) ?
+                                                    (s?.Done) ?
                                                         <IonLabel
                                                             style={{ textDecoration: "line-through" }}
-                                                        >{ActivityList[s].Title}</IonLabel>
+                                                        >{s?.Title}</IonLabel>
                                                         :
-                                                        <IonLabel>{ActivityList[s].Title}</IonLabel>
+                                                        <IonLabel>{s?.Title}</IonLabel>
                                                 }
                                             </IonCheckbox>
 
-                                            <IonCardSubtitle>Repeats every {ActivityList[s].DaySchedule} days</IonCardSubtitle>
+                                            {/* <IonCardSubtitle>Repeats every {s?.DaySchedule} days</IonCardSubtitle> */}
 
                                         </IonItem>
 
-                                        <IonItemOptions side="start" onIonSwipe={() => { marksActivity(ActivityList[s].Title) }}>
+                                        <IonItemOptions side="start" onIonSwipe={() => { marksActivity(s?.Title) }}>
                                             <IonItemOption color="success" expandable
-                                                onClick={() => { marksActivity(ActivityList[s].Title) }}
+                                                onClick={() => { marksActivity(s?.Title) }}
                                             >
                                                 <IonIcon slot="bottom" icon={checkmarkOutline}></IonIcon>
                                                 Done
                                             </IonItemOption>
                                         </IonItemOptions>
                                         <IonItemOptions side="end" onIonSwipe={() => {
-                                            if (ActivityList[s].Mode == 'timer') {
-                                                showTimer(ActivityList[s].Timer, ActivityList[s].Title)
+                                            if (s.Mode == 'timer') {
+                                                showTimer(s.Timer, s.Title)
                                             } else {
-                                                refModalActivity?.current?.editActivity()
+                                                refModalActivity?.current?.editActivity(s.Title,s.Mode,s.Timer)
                                             }
                                         }}>
 
                                             <IonItemOption expandable
-                                                onClick={() => { refModalActivity?.current?.editActivity() }}>
+                                                onClick={() => { refModalActivity?.current?.editActivity(s.Title, s.Mode, s.Timer) }}>
                                                 <IonIcon slot="bottom" icon={createOutline}></IonIcon>
                                                 Edit
                                             </IonItemOption>
                                             {
-                                                (ActivityList[s].Mode == 'timer') ?
+                                                (s?.Mode == 'timer') ?
                                                     <IonItemOption color={"warning"}
-                                                        onClick={() => { showTimer(ActivityList[s].Timer, ActivityList[s].Title) }}
+                                                        onClick={() => { showTimer(s?.Timer, s?.Title) }}
                                                         expandable
                                                     >
                                                         <IonIcon slot="bottom" icon={timerOutline} />

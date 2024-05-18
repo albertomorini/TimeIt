@@ -1,5 +1,5 @@
 import { IonButton, IonCol, IonContent, IonHeader, IonIcon, IonModal, IonProgressBar, IonRow, IonToolbar } from "@ionic/react";
-import { closeOutline, playOutline, stopOutline } from "ionicons/icons";
+import { closeOutline, pause, playOutline, stopOutline, time } from "ionicons/icons";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import "../theme/timer.css";
 import moment from "moment";
@@ -9,11 +9,12 @@ const Timer = forwardRef((props, ref) => {
     const refModalTimer = useRef()
 
     let [AbsDifference, setAbsDifference] = useState(null);
-    let [IsPause, setIsPause] = useState(false);
+    let [ShowPauseButton, setShowPauseButton] = useState(false);
     var timer = null;
+    let [TimerID,setTimerID] = useState(null);
 
     let [InitialDifference, setInitialDifference] = useState(null);
-    let [ActivityTitle,setActivityTitle] = useState();
+    let [ActivityTitle, setActivityTitle] = useState();
 
 
     /**
@@ -66,30 +67,27 @@ const Timer = forwardRef((props, ref) => {
                     document.getElementById("progressBar").color = "danger"
                 }
                 //MARKS ACTIVITY AS DONE IF TIMER ENDED
-                if(AbsDifference==0){
+                if (AbsDifference <= 0) {
+                    console.log("Timer ended");
                     props?.marksActivity(ActivityTitle)
                 }
             }
         }, 1000); //every 1 second
+        setTimerID(timer);
     }
 
     function pauseTimer() {
+        
+        clearInterval(TimerID);
         clearInterval(timer);
         timer = null;
+        setTimerID(null);
     }
 
-
-    function clearTimer() {
-        setAbsDifference(null)
-        setInitialDifference(null)
-        clearTimeout(timer);
-        timer = null;
-        setIsPause(false)
-    }
 
     useImperativeHandle(ref, () => ({
         //salva l'intervento
-        setTimer: async (hour, minutes, seconds,activityTitle) => {
+        setTimer: async (hour, minutes, seconds, activityTitle) => {
 
             initializeTimer(hour, minutes, seconds); //initialize the timer by adding an offset {hour,minutes,seconds}
             //SHOW THE TIMER
@@ -104,56 +102,50 @@ const Timer = forwardRef((props, ref) => {
         <IonModal ref={refModalTimer}>
 
             <IonContent className="ion-padding">
-                    <IonButton color="danger" 
-                        onClick={() => {
-                            refModalTimer?.current?.dismiss()
-                        }}
-                    >
-                        <IonIcon icon={closeOutline} />
-                    </IonButton>
+                <IonButton color="danger"
+                    onClick={() => {
+                        refModalTimer?.current?.dismiss()
+                    }}
+                >
+                    <IonIcon icon={closeOutline} />
+                </IonButton>
 
                 <h2 className="centerNumbers">
                     <p id="PlaceholderTimer"></p>
                     <IonProgressBar id="progressBar" />
                 </h2>
 
-
+<br/>
                 <IonRow>
+                    <IonCol>
 
-                    {(IsPause) ?
-                        <IonCol>
+                        {(ShowPauseButton) ?
                             <IonButton
-
+                                expand="block"
                                 className="buttonsTimer"
-                                style={{ float: "right" }}
+                                // style={{ float: "right" }}
                                 onClick={() => {
-                                    if (!IsPause) {
-                                        pauseTimer()
-                                        setIsPause(true)
-                                    } else {
-                                        startTimer(false)
-
-                                    }
+                                    pauseTimer();
+                                    setShowPauseButton(false)
                                 }}
                                 color="danger"
                             > Pause
                                 <IonIcon icon={stopOutline} />
                             </IonButton>
-                        </IonCol>
-                        :
-                        <IonCol>
-
+                            :
                             <IonButton
-                                style={{ float: "right" }}
-
+                                expand="block"
+                                // style={{ float: "right" }}
                                 onClick={() => {
-                                    startTimer()
+                                    setShowPauseButton(true)
+                                    startTimer(false)
                                 }}
                                 className="buttonsTimer"
                             > Start
                                 <IonIcon icon={playOutline} />
                             </IonButton>
-                        </IonCol>}
+                        }
+                    </IonCol>
 
                 </IonRow>
 
