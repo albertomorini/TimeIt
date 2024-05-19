@@ -1,6 +1,6 @@
 import { IonButton, IonContent, IonDatetime, IonIcon, IonInput, IonLabel, IonRow, IonSegment, IonSegmentButton } from "@ionic/react";
 import { checkmarkCircle } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import moment from "moment";
 
 import { Storage } from '@ionic/storage';
@@ -15,9 +15,9 @@ const ContentActivity = (props) => {
     const [ActivityMode, setActivityMode] = useState((props?.defaultValues?.mode != undefined) ? props?.defaultValues?.mode : "classic"); //default value for mode
     const [ActivityDaySchedule, setActivityDaySchedule] = useState(null);
     const [ActivityTimer, setActivityTimer] = useState({
-        hour: props?.defaultValues?.timer?.hour,
-        minutes: props?.defaultValues?.timer?.minutes,
-        seconds: props?.defaultValues?.timer?.seconds
+        hour: (props?.defaultValues?.timer?.hour == undefined) ? 0 : props?.defaultValues?.timer?.hour == undefined,
+        minutes: (props?.defaultValues?.timer?.minutes==undefined)?0:props?.defaultValues?.timer?.minutes,
+        seconds: (props?.defaultValues?.timer?.seconds==undefined)?0:props?.defaultValues?.timer?.seconds
     });
 
     function cleanInputs() {

@@ -1,4 +1,4 @@
-import { IonButton, IonCardSubtitle, IonCheckbox, IonCol, IonContent, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonList, IonRow, IonSearchbar } from "@ionic/react";
+import { IonButton, IonCheckbox, IonCol, IonContent, IonIcon, IonItem, IonItemDivider, IonItemOption, IonItemOptions, IonItemSliding, IonLabel, IonRow, IonSearchbar } from "@ionic/react";
 import { checkmarkOutline, createOutline, timeOutline, timerOutline } from "ionicons/icons";
 import Timer from "../components/Timer";
 import { useEffect, useRef, useState } from "react";
@@ -6,7 +6,7 @@ import { Storage } from '@ionic/storage';
 import moment from "moment";
 import ModalActivity from "../components/ModalActivity";
 
-import "../theme/TodoList.css"
+import "../theme/TodoList.css";
 
 const TodoList = () => {
     const store = new Storage();

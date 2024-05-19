@@ -1,5 +1,5 @@
-import { IonButton, IonCol, IonContent, IonHeader, IonIcon, IonModal, IonProgressBar, IonRow, IonToolbar } from "@ionic/react";
-import { closeOutline, pause, playOutline, stopOutline, time } from "ionicons/icons";
+import { IonButton, IonCol, IonContent, IonHeader, IonIcon, IonModal, IonProgressBar, IonRow, IonTitle, IonToolbar } from "@ionic/react";
+import { closeOutline, playOutline, stopOutline } from "ionicons/icons";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import "../theme/timer.css";
 import moment from "moment";
@@ -11,7 +11,7 @@ const Timer = forwardRef((props, ref) => {
     let [AbsDifference, setAbsDifference] = useState(null);
     let [ShowPauseButton, setShowPauseButton] = useState(false);
     var timer = null;
-    let [TimerID,setTimerID] = useState(null);
+    let [TimerID, setTimerID] = useState(null);
 
     let [InitialDifference, setInitialDifference] = useState(null);
     let [ActivityTitle, setActivityTitle] = useState();
@@ -77,7 +77,7 @@ const Timer = forwardRef((props, ref) => {
     }
 
     function pauseTimer() {
-        
+
         clearInterval(TimerID);
         clearInterval(timer);
         timer = null;
@@ -101,21 +101,27 @@ const Timer = forwardRef((props, ref) => {
     return (
         <IonModal ref={refModalTimer}>
 
+            <IonHeader>
+                <IonToolbar>
+                    <IonTitle className="ion-text-center">{ActivityTitle}</IonTitle>
+                    <IonButton color="danger"
+                        slot="end"
+                        onClick={() => {
+                            refModalTimer?.current?.dismiss()
+                        }}
+                    >
+                        <IonIcon icon={closeOutline} />
+                    </IonButton>
+                </IonToolbar>
+            </IonHeader>
             <IonContent className="ion-padding">
-                <IonButton color="danger"
-                    onClick={() => {
-                        refModalTimer?.current?.dismiss()
-                    }}
-                >
-                    <IonIcon icon={closeOutline} />
-                </IonButton>
 
                 <h2 className="centerNumbers">
                     <p id="PlaceholderTimer"></p>
                     <IonProgressBar id="progressBar" />
                 </h2>
 
-<br/>
+                <br />
                 <IonRow>
                     <IonCol>
 
