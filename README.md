@@ -27,5 +27,11 @@ Open stuff:
 - to iOS and Android
 
 
+## Screenshots
+
+![UI](./Docs/1.png)
+![UI](./Docs/2.png)
+![UI](./Docs/3.png)
+
 ## Conclusion 
 
